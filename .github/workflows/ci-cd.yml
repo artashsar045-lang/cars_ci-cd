@@ -1,6 +1,5 @@
 name: CI/CD
 
-# Run on push and pull requests to main
 on:
   push:
     branches: [ "main" ]
@@ -8,50 +7,46 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
-    name: Build, Test & Lint
+  test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          node-version: "18"
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run tests
-        run: npm test
-
-      - name: Run linter (optional)
-        run: npm run lint
+        run: |
+          if [ -f pytest.ini ] || [ -d tests ]; then pytest; fi
 
   docker-build:
-    name: Build Docker Image
+    needs: test
     runs-on: ubuntu-latest
-    needs: build-and-test
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build Docker images
-        run: |
-          docker build -t cars-ci-cd:latest .
+      - name: Build Docker image
+        run: docker build -t cars-ci-cd:latest .
 
-      # Push to GitHub Container Registry (optional)
-      - name: Log into GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Tag & push image
+      - name: Push Docker image
         run: |
           docker tag cars-ci-cd:latest ghcr.io/${{ github.repository }}/cars-ci-cd:latest
           docker push ghcr.io/${{ github.repository }}/cars-ci-cd:latest
