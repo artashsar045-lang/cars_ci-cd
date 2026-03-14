@@ -27,7 +27,7 @@ jobs:
             set -e
 
             # Navigate to your project folder on EC2
-            cd ~/cars_ci-cd
+            cd ~/CAR_CI_CD
 
             echo "Pulling latest changes from GitHub..."
             git fetch --all
