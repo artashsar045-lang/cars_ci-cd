@@ -7,19 +7,18 @@ services:
     environment:
       MYSQL_DATABASE: project_db
       MYSQL_ROOT_PASSWORD: "1111"
-      MYSQL_USER: flaskuser
-      MYSQL_PASSWORD: flaskpass
     ports:
-      - "3306:3306"
+      - "8000:8000"
     volumes:
       - db_data:/var/lib/mysql
 
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "flaskuser", "-pflaskpass"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p1111"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+
 
   backend:
     build:
