@@ -21,7 +21,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}          # EC2 IP
           username: ${{ secrets.EC2_USER }}      # EC2 username (e.g., ubuntu or deployuser)
-          key: ${{ secrets.EC2_KEY }}            # Private key stored in GitHub secrets
+          key: ${{ secrets.SSH_KEY }}            # Private key stored in GitHub secrets
           port: 22
           script: |
             set -e
