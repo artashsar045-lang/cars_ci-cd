@@ -1,0 +1,47 @@
+name: Auto Deploy to EC2
+
+# Trigger on pushes to main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout code from GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Deploy via SSH to EC2
+      - name: Deploy to EC2 server
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}          # EC2 IP
+          username: ${{ secrets.EC2_USER }}      # EC2 username (e.g., ubuntu or deployuser)
+          key: ${{ secrets.SSH_KEY }}            # Private key stored in GitHub secrets
+          port: 22
+          script: |
+            set -e
+
+            # Navigate to your project folder on EC2
+            cd ~/CAR_CI_CD
+
+            echo "Pulling latest changes from GitHub..."
+            git fetch --all
+            git reset --hard origin/main
+
+            echo "Backing up existing .env file..."
+            if [ -f .env ]; then
+              cp .env .env.bak
+            fi
+
+            echo "Stopping current Docker Compose services..."
+            docker compose -f docker-compose.yml down
+
+            echo "Building and starting Docker Compose services..."
+            docker compose -f docker-compose.yml up -d --build
+
+            echo "Deployment complete!"
