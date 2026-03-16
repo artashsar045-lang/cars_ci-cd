@@ -7,8 +7,10 @@ services:
     environment:
       MYSQL_DATABASE: project_db
       MYSQL_ROOT_PASSWORD: "1111"
+      MYSQL_USER: flaskuser
+      MYSQL_PASSWORD: flaskpass
     ports:
-      - "8000:8000"
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
 
@@ -18,7 +20,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-
 
   backend:
     build:
